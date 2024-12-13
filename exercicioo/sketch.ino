@@ -14,6 +14,8 @@ int threshold = 600;
 long lastDebouceTime = 0;
 long debounceTime = 50;
 
+int redState = 0;
+
 void setup() {
 
   // inicial pin settings to control the leds as esp32 OUTPUTs
@@ -35,7 +37,9 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("Successfully connected to WiFi!"); // considering it is out of the loop, ESP32 is now connected to the WiFi (another option is to put inside the following if)
+  
   redState = digitalRead(red_led);
+
   // verifies the button state
   buttonState = digitalRead(buttonPin);
   if (buttonState == HIGH) {
@@ -44,24 +48,19 @@ void setup() {
         delay(1000);
         digitalWrite(green_led, HIGH);
         delay(3000);
-      }
+        Serial.println("Button pressed!");
+      }else {
+    Serial.println("Button not pressed!");
 
     lastDebouceTime = millis();
   }
-      
-  }
-    
-    digitalWrite(red_led, LOW);
-    digitalWrite(green_led, HIGH);
-    delay(3000);
-    Serial.println("Button pressed!");
-  } else {
-    Serial.println("Button not pressed!");
-  }
+    }
 
+  }
+  
   if(WiFi.status() == WL_CONNECTED){ // if esp32 is connected to the internet
     HTTPClient http;
-
+    
     String serverPath = "http://www.google.com.br/"; // HTTP request Endpoint
 
     http.begin(serverPath.c_str());
