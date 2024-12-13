@@ -1,8 +1,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-#define blue_led 9 // Pin used to control the blue led
-#define green_led 41 // Pin used to control the green led
+#define green_led 2 // Pin used to control the green led
 #define red_led 40 // Pin used to control the red led
 #define yellow_led 9 // Pin used to control the yellow led
 
@@ -12,17 +11,18 @@ int buttonState = 0;  // variable for reading the pushbutton status
 const int ldrPin = 4;  // the number of the pushbutton pin
 int threshold = 600;
 
+long lastDebouceTime = 0;
+long debounceTime = 50;
+
 void setup() {
 
   // inicial pin settings to control the leds as esp32 OUTPUTs
-  pinMode(blue_led,OUTPUT);
   pinMode(green_led,OUTPUT);
   pinMode(red_led,OUTPUT);
 
   // Initialize the inputs
-  pinMode(buttonPin, INPUT); // Initialize the pushbutton pin as an input
+  pinMode(buttonPin, INPUT_PULLDOWN); // Initialize the pushbutton pin as an input
 
-  digitalWrite(blue_led, LOW);
   digitalWrite(green_led, LOW);
   digitalWrite(red_led, LOW);
 
@@ -35,11 +35,22 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("Successfully connected to WiFi!"); // considering it is out of the loop, ESP32 is now connected to the WiFi (another option is to put inside the following if)
-
+  redState = digitalRead(red_led);
   // verifies the button state
   buttonState = digitalRead(buttonPin);
   if (buttonState == HIGH) {
-    delay(1000);
+    if((millis() - lastDebouceTime) > debounceTime){
+      if (redState == HIGH) {
+        delay(1000);
+        digitalWrite(green_led, HIGH);
+        delay(3000);
+      }
+
+    lastDebouceTime = millis();
+  }
+      
+  }
+    
     digitalWrite(red_led, LOW);
     digitalWrite(green_led, HIGH);
     delay(3000);
